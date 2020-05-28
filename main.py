@@ -3,6 +3,7 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import random
 from config import vk_token
 from data import db_session
+from bad_words import bad
 
 sessionStorage = {}
 
@@ -30,17 +31,54 @@ def handle_dialog(event, vk):
     rndm = random.randint(0, 2 ** 64)
     user_id = event.obj.message['from_id']
     message = event.obj.message['text']
+    if 'принять' in message.lower().split() and user_id == 570864703:
+        vk.messages.send(user_id=message.lower().split()[1],
+                         message=f"Congratulations!!!🎉🎉🎉\n"
+                                 f"✅Вы приняты в клан Harakiri!\n"
+                                 f"Скоро Вас добавят в беседу клана 🔥",
+                         random_id=rndm)
+    elif 'принять' not in message.lower().split() and user_id == 570864703:
+        splited = message.split()
+        id = splited[-1]
+        del splited[-1]
+        message = ''.join(splited)
+        vk.messages.send(user_id=id,
+                         message=f"🚫К сожалению, Ваша заявка была отклонена.\n"
+                                 f"Причина: {message}",
+                         random_id=rndm)
+
     if user_id in sessionStorage:
         quests = sessionStorage[user_id]['last_question']
         if quests == 1:
+            message_bad = message.split()
+            for el in message_bad:
+                if el in bad:
+                    vk.messages.send(user_id=user_id,
+                                     message=f"Ваша заявка автоматически отклонена😭\n"
+                                             f"Причина: оскорбительное поведение",
+                                     random_id=rndm)
+                    sessionStorage[user_id]['last_question'] = 0
+                    return
+
             vk.messages.send(user_id=user_id,
                              message=f"Добро пожаловать, {message}! \n"
                                      f"Теперь напишите свой nickname на мини-играх",
                              random_id=rndm)
             sessionStorage[user_id]['last_question'] = 2
+            sessionStorage[user_id]['id'] = user_id
             return
 
         if quests == 2:
+            message_bad = message.split()
+            for el in message_bad:
+                if el in bad:
+                    vk.messages.send(user_id=user_id,
+                                     message=f"Ваша заявка автоматически отклонена😭\n"
+                                             f"Причина: оскорбительное поведение",
+                                     random_id=rndm)
+                    sessionStorage[user_id]['last_question'] = 0
+                    return
+
             if message == '/сбросить':
                 vk.messages.send(user_id=user_id,
                                  message=f"Вас приветствует Harakiri-bot. Чтобы заполнить заявку,"
@@ -80,10 +118,21 @@ def handle_dialog(event, vk):
                                          f"одобрим ли мы Вашу заявку или нет.)\n"
                                          f"!!! Пишите свой возраст цифрами, иначе бот не поймет Вас !!!",
                                  random_id=rndm)
+                sessionStorage[user_id]['nick'] = message
                 sessionStorage[user_id]['last_question'] = 3
                 return
 
         if quests == 3:
+            message_bad = message.split()
+            for el in message_bad:
+                if el in bad:
+                    vk.messages.send(user_id=user_id,
+                                     message=f"Ваша заявка автоматически отклонена😭\n"
+                                             f"Причина: оскорбительное поведение",
+                                     random_id=rndm)
+                    sessionStorage[user_id]['last_question'] = 0
+                    return
+
             if message == '/сбросить':
                 vk.messages.send(user_id=user_id,
                                  message=f"Вас приветствует Harakiri-bot. Чтобы заполнить заявку,"
@@ -109,6 +158,7 @@ def handle_dialog(event, vk):
                                          f"Пишите донат английскими символами! Если доната нет, "
                                          f"напишите 'player'",
                                  random_id=rndm)
+                sessionStorage[user_id]['age'] = message
                 sessionStorage[user_id]['last_question'] = 4
                 return
             else:
@@ -120,6 +170,16 @@ def handle_dialog(event, vk):
                 return
 
         if quests == 4:
+            message_bad = message.split()
+            for el in message_bad:
+                if el in bad:
+                    vk.messages.send(user_id=user_id,
+                                     message=f"Ваша заявка автоматически отклонена😭\n"
+                                             f"Причина: оскорбительное поведение",
+                                     random_id=rndm)
+                    sessionStorage[user_id]['last_question'] = 0
+                    return
+
             if message == '/сбросить':
                 vk.messages.send(user_id=user_id,
                                  message=f"Вас приветствует Harakiri-bot. Чтобы заполнить заявку,"
@@ -146,6 +206,7 @@ def handle_dialog(event, vk):
                                              f"зарегистрироваться, а пока что напишите боту 'нет' \n"
                                              f"Пример никнейма в дискорде: Snowylqrd#1100",
                                      random_id=rndm)
+                    sessionStorage[user_id]['donate'] = message
                     sessionStorage[user_id]['last_question'] = 5
                     return
                 else:
@@ -156,6 +217,16 @@ def handle_dialog(event, vk):
                     return
 
         if quests == 5:
+            message_bad = message.split()
+            for el in message_bad:
+                if el in bad:
+                    vk.messages.send(user_id=user_id,
+                                     message=f"Ваша заявка автоматически отклонена😭\n"
+                                             f"Причина: оскорбительное поведение",
+                                     random_id=rndm)
+                    sessionStorage[user_id]['last_question'] = 0
+                    return
+
             if message == '/сбросить':
                 vk.messages.send(user_id=user_id,
                                  message=f"Вас приветствует Harakiri-bot. Чтобы заполнить заявку,"
@@ -183,6 +254,7 @@ def handle_dialog(event, vk):
                                          f"в беседе/группе/дискорде клана.)"
                                          f"!!! Пишите количество часов цифрами, иначе бот не поймет Вас !!!",
                                  random_id=rndm)
+                sessionStorage[user_id]['discord'] = message
                 sessionStorage[user_id]['last_question'] = 6
                 return
             elif '#' in message and message_listed[-1].isdigit() and message_listed[-2].isdigit() and \
@@ -194,6 +266,7 @@ def handle_dialog(event, vk):
                                          f"в беседе/группе/дискорде клана.)\n"
                                          f"!!! Пишите количество часов цифрами, иначе бот не поймет Вас !!!",
                                  random_id=rndm)
+                sessionStorage[user_id]['discord'] = message
                 sessionStorage[user_id]['last_question'] = 6
                 return
             elif message == 'Snowylqrd#1100':
@@ -212,6 +285,16 @@ def handle_dialog(event, vk):
                 return
 
         if quests == 6:
+            message_bad = message.split()
+            for el in message_bad:
+                if el in bad:
+                    vk.messages.send(user_id=user_id,
+                                     message=f"Ваша заявка автоматически отклонена😭\n"
+                                             f"Причина: оскорбительное поведение",
+                                     random_id=rndm)
+                    sessionStorage[user_id]['last_question'] = 0
+                    return
+
             if message == '/сбросить':
                 vk.messages.send(user_id=user_id,
                                  message=f"Вас приветствует Harakiri-bot. Чтобы заполнить заявку,"
@@ -244,10 +327,21 @@ def handle_dialog(event, vk):
                                  message=f"Well! Осталось еще чуть-чуть😉\n\n"
                                          f"В каких кланах Вы раньше были?",
                                  random_id=rndm)
+                sessionStorage[user_id]['hours'] = message
                 sessionStorage[user_id]['last_question'] = 7
                 return
 
         if quests == 7:
+            message_bad = message.split()
+            for el in message_bad:
+                if el in bad:
+                    vk.messages.send(user_id=user_id,
+                                     message=f"Ваша заявка автоматически отклонена😭\n"
+                                             f"Причина: оскорбительное поведение",
+                                     random_id=rndm)
+                    sessionStorage[user_id]['last_question'] = 0
+                    return
+
             if message == '/сбросить':
                 vk.messages.send(user_id=user_id,
                                  message=f"Вас приветствует Harakiri-bot. Чтобы заполнить заявку,"
@@ -271,10 +365,39 @@ def handle_dialog(event, vk):
                              message=f"Wonderful!😏 Отправьте скриншот Вашей статистики на режиме "
                                      f"'BedWars'",
                              random_id=rndm)
+            sessionStorage[user_id]['clans'] = message
             sessionStorage[user_id]['last_question'] = 8
             return
 
         if quests == 8:
+            if message == '/сбросить':
+                vk.messages.send(user_id=user_id,
+                                 message=f"Вас приветствует Harakiri-bot. Чтобы заполнить заявку,"
+                                         f"отвечайте на вопросы, которые задаст бот. Помните, пишите только реальные данные,"
+                                         f" иначе Ваша заявка "
+                                         f"будет отклонена. Если Вы нашли ошибку, пишите напрямую создателю клана.\n"
+                                         f"Желаем вам удачи на отборе!)\n"
+                                         f"C уважением, @xskywalker"
+                                         f"\n\n"
+                                         f"если вы случайно допустили ошибку в заполнении, напишите '/сбросить'"
+                                         f"\n\n"
+                                         f"Итак, приступим. \n"
+                                         f"Как к вам можно обращаться? (Напишите свое имя)",
+                                 random_id=rndm)
+                sessionStorage[user_id] = {
+                    'last_question': 1
+                }
+                return
+            message_bad = message.split()
+            for el in message_bad:
+                if el in bad:
+                    vk.messages.send(user_id=user_id,
+                                     message=f"Ваша заявка автоматически отклонена😭\n"
+                                             f"Причина: оскорбительное поведение",
+                                     random_id=rndm)
+                    sessionStorage[user_id]['last_question'] = 0
+                    return
+
             vk.messages.send(user_id=user_id,
                              message=f"Поздравляем!🥳\n Ваша заявка была отправлена на рассмотрение "
                                      f"администрации клана.\n"
@@ -282,8 +405,15 @@ def handle_dialog(event, vk):
                              random_id=rndm)
 
             vk.messages.send(user_id=570864703,
-                             message=f"У вас новая заявка от @id{user_id}",
+                             message=f"У вас новая заявка от @id{user_id}\n"
+                                     f"1. {sessionStorage[user_id]['nick']}\n"
+                                     f"2. {sessionStorage[user_id]['donate']}\n"
+                                     f"3. {sessionStorage[user_id]['age']}\n"
+                                     f"4. {sessionStorage[user_id]['discord']}\n"
+                                     f"5. {sessionStorage[user_id]['hours']}\n",
                              random_id=rndm)
+            sessionStorage[user_id]['last_question'] = 9
+            return
 
     else:
         vk.messages.send(user_id=user_id,
