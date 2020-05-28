@@ -406,11 +406,11 @@ def handle_dialog(event, vk):
 
             vk.messages.send(user_id=570864703,
                              message=f"У вас новая заявка от @id{user_id}\n"
-                                     f"1. {sessionStorage[user_id]['nick']}\n"
-                                     f"2. {sessionStorage[user_id]['donate']}\n"
-                                     f"3. {sessionStorage[user_id]['age']}\n"
-                                     f"4. {sessionStorage[user_id]['discord']}\n"
-                                     f"5. {sessionStorage[user_id]['hours']}\n",
+                                     f"1. [Ник] {sessionStorage[user_id]['nick']}\n"
+                                     f"2. [Донат]{sessionStorage[user_id]['donate']}\n"
+                                     f"3. [Возраст]{sessionStorage[user_id]['age']}\n"
+                                     f"4. [Дискорд]{sessionStorage[user_id]['discord']}\n"
+                                     f"5. [Часов в день]{sessionStorage[user_id]['hours']}\n",
                              random_id=rndm)
             sessionStorage[user_id]['last_question'] = 9
             return
