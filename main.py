@@ -238,7 +238,7 @@ def handle_dialog(event, vk):
                 sessionStorage[user_id]['last_question'] = 7
                 return
 
-        if quests == 7:  # TODO скриншот статистики
+        if quests == 7:
             if message == '/сбросить':
                 vk.messages.send(user_id=user_id,
                                  message=f"Вас приветствует Harakiri-bot. Чтобы заполнить заявку,"
@@ -261,6 +261,15 @@ def handle_dialog(event, vk):
             vk.messages.send(user_id=user_id,
                              message=f"Wonderful! Отправьте скриншот Вашей статистики на режиме "
                                      f"'BedWars'",
+                             random_id=rndm)
+            sessionStorage[user_id]['last_question'] = 8
+            return
+
+        if quests == 8:
+            vk.messages.send(user_id=user_id,
+                             message=f"Поздравляем!🥳\n Ваша заявка была отправлена на рассмотрение "
+                                     f"администрации клана.\n"
+                                     f"⚠ Примерное время ожидания составляет ~ 1 день",
                              random_id=rndm)
 
     else:
