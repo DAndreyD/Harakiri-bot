@@ -6,6 +6,11 @@ import urllib3
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import random
+
+from blacklist import bs_ds, bs_nick, bs_id
+from donates import donates
+from discords import discords
+from nicknames import nicknames
 from config import vk_token
 from data import db_session
 from bad_words import bad
@@ -41,6 +46,13 @@ def handle_dialog(event, vk):
     rndm = random.randint(0, 2 ** 64)
     user_id = event.obj.message['from_id']
     message = event.obj.message['text']
+    if str(user_id) in bs_id:
+        vk.messages.send(user_id=user_id,
+                         message=f"Ваш аккаунт ВКонтакте недоступен для подачи "
+                                 f"заявок в клан. Если Вы хотите узнать причину, "
+                                 f"пишите сюда:\n"
+                                 f"-> @xskywalker",
+                         random_id=rndm)
     if 'принять' in message.lower().split() and user_id == 570864703:
         vk.messages.send(user_id=message.lower().split()[1],
                          message=f"Congratulations!!!🎉🎉🎉\n"
@@ -106,6 +118,19 @@ def handle_dialog(event, vk):
                 sessionStorage[user_id] = {
                     'last_question': 1
                 }
+                return
+            if message.lower() in bs_nick:
+                vk.messages.send(user_id=user_id,
+                                 message=f"Ваш никнейм находится в черном списке клана\n"
+                                         f"Ваша заявка автоматически отклонена.",
+                                 random_id=rndm)
+                sessionStorage[user_id]['last_question'] = 0
+                return
+            elif message.lower() in nicknames:
+                vk.messages.send(user_id=user_id,
+                                 message="Этот никнейм уже зарегистрирован",
+                                 random_id=rndm)
+                sessionStorage[user_id]['last_question'] = 2
                 return
             flag = True
             while flag:
@@ -208,23 +233,22 @@ def handle_dialog(event, vk):
                     'last_question': 1
                 }
                 return
-            message_splited = list(message)
-            for element in message_splited:
-                if element in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM":
-                    vk.messages.send(user_id=user_id,
-                                     message=f"Отлично! Теперь напишите свой дискорд.😴 Если у Вас его нет, то советуем "
-                                             f"зарегистрироваться, а пока что напишите боту 'нет' \n"
-                                             f"Пример никнейма в дискорде: Snowylqrd#1100",
-                                     random_id=rndm)
-                    sessionStorage[user_id]['donate'] = message
-                    sessionStorage[user_id]['last_question'] = 5
-                    return
-                else:
-                    vk.messages.send(user_id=user_id,
-                                     message=f"Вы должны ввести донат английскими буквами!🤬",
-                                     random_id=rndm)
-                    sessionStorage[user_id]['last_question'] = 4
-                    return
+
+            if message.lower() in donates:
+                vk.messages.send(user_id=user_id,
+                                 message=f"Отлично! Теперь напишите свой дискорд.😴 Если у Вас его нет, то советуем "
+                                         f"зарегистрироваться, а пока что напишите боту 'нет' \n"
+                                         f"Пример никнейма в дискорде: Snowylqrd#1100",
+                                 random_id=rndm)
+                sessionStorage[user_id]['donate'] = message
+                sessionStorage[user_id]['last_question'] = 5
+                return
+            else:
+                vk.messages.send(user_id=user_id,
+                                 message=f"Вы должны ввести существующий донат английскими буквами!🤬",
+                                 random_id=rndm)
+                sessionStorage[user_id]['last_question'] = 4
+                return
 
         if quests == 5:
             message_bad = message.split()
@@ -256,7 +280,14 @@ def handle_dialog(event, vk):
                 }
                 return
             message_listed = list(message)
-            if message.lower() == 'нет':
+            if message.lower() in bs_ds:
+                vk.messages.send(user_id=user_id,
+                                 message=f"Ваш дискорд находится в черном списке клана\n"
+                                         f"Ваша заявка автоматически отклонена.",
+                                 random_id=rndm)
+                sessionStorage[user_id]['last_question'] = 0
+                return
+            elif message.lower() == 'нет':
                 vk.messages.send(user_id=user_id,
                                  message=f"Хорошо. Оцените, сколько часов в день вы можете"
                                          f"уделять нашему клану🥺 (Имеется в виду не только время,"
@@ -266,6 +297,13 @@ def handle_dialog(event, vk):
                                  random_id=rndm)
                 sessionStorage[user_id]['discord'] = message
                 sessionStorage[user_id]['last_question'] = 6
+                return
+            elif message.lower() in discords:
+                vk.messages.send(user_id=user_id,
+                                 message=f"Не обманывайте меня👿\n"
+                                         f"Этот дискорд уже зарегистрирован",
+                                 random_id=rndm)
+                sessionStorage[user_id]['last_question'] = 5
                 return
             elif '#' in message and message_listed[-1].isdigit() and message_listed[-2].isdigit() and \
                     message_listed[-3].isdigit() and message_listed[-4].isdigit():
@@ -278,13 +316,6 @@ def handle_dialog(event, vk):
                                  random_id=rndm)
                 sessionStorage[user_id]['discord'] = message
                 sessionStorage[user_id]['last_question'] = 6
-                return
-            elif message == 'Snowylqrd#1100':
-                vk.messages.send(user_id=user_id,
-                                 message=f"Не обманывайте меня👿\n"
-                                         f"Введите свой реальный никнейм в дискорде",
-                                 random_id=rndm)
-                sessionStorage[user_id]['last_question'] = 5
                 return
             else:
                 vk.messages.send(user_id=user_id,

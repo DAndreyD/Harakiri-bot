@@ -1,0 +1,1 @@
+nicknames = ['xshichiro_', 'xshimato_', '__fomka__', 'frikshek', 'newyardtopchik20']

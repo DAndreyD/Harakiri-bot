@@ -1,0 +1,1 @@
+donates = ['vip', 'vip+', 'mvp', 'mvp+', 'shame', 'fire', 'helper', 'moderator', 'staff', 'player']
