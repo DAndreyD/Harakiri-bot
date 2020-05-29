@@ -1,3 +1,8 @@
+import socket
+from datetime import time
+
+import requests
+import urllib3
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import random
@@ -17,14 +22,19 @@ def main():
 
     longpoll = VkBotLongPoll(vk_session, 195012202)
 
-    for event in longpoll.listen():
+    while True:
+        try:
+            for event in longpoll.listen():
 
-        if event.type == VkBotEventType.MESSAGE_NEW:
-            print(event)
-            print('Новое сообщение:')
-            print('Для меня от:', event.obj.message['from_id'])
-            print('Текст:', event.obj.message['text'])
-            handle_dialog(event, vk)
+                if event.type == VkBotEventType.MESSAGE_NEW:
+                    print(event)
+                    print('Новое сообщение:')
+                    print('Для меня от:', event.obj.message['from_id'])
+                    print('Текст:', event.obj.message['text'])
+                    handle_dialog(event, vk)
+
+        except (requests.exceptions.ReadTimeout, socket.timeout, urllib3.exceptions.ReadTimeoutError):
+            print('n_____________Timeout______________n')
 
 
 def handle_dialog(event, vk):
@@ -41,7 +51,7 @@ def handle_dialog(event, vk):
         splited = message.split()
         id = splited[-1]
         del splited[-1]
-        message = ''.join(splited)
+        message = ' '.join(splited)
         vk.messages.send(user_id=id,
                          message=f"🚫К сожалению, Ваша заявка была отклонена.\n"
                                  f"Причина: {message}",
@@ -407,10 +417,10 @@ def handle_dialog(event, vk):
             vk.messages.send(user_id=570864703,
                              message=f"У вас новая заявка от @id{user_id}\n"
                                      f"1. [Ник] {sessionStorage[user_id]['nick']}\n"
-                                     f"2. [Донат]{sessionStorage[user_id]['donate']}\n"
-                                     f"3. [Возраст]{sessionStorage[user_id]['age']}\n"
-                                     f"4. [Дискорд]{sessionStorage[user_id]['discord']}\n"
-                                     f"5. [Часов в день]{sessionStorage[user_id]['hours']}\n",
+                                     f"2. [Донат] {sessionStorage[user_id]['donate']}\n"
+                                     f"3. [Возраст] {sessionStorage[user_id]['age']}\n"
+                                     f"4. [Дискорд] {sessionStorage[user_id]['discord']}\n"
+                                     f"5. [Часов в день] {sessionStorage[user_id]['hours']}\n",
                              random_id=rndm)
             sessionStorage[user_id]['last_question'] = 9
             return
